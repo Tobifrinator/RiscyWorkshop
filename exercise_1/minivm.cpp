@@ -265,6 +265,51 @@ constexpr static VMBytecode bytecode = VMBytecode({
     RET(REG(6)),                 // return r6
 });
 
+constexpr static VMBytecode bytecode_add = VMBytecode({
+    ADD(REG(0), REG(0), (REG(1))),
+    RET(REG(0)),
+});
+
+constexpr static VMBytecode bytecode_sub = VMBytecode({
+    MOVIMM(REG(2), -1),
+    MUL(REG(1), REG(1), REG(2)),
+    ADD(REG(0), REG(0), REG(1)),
+    RET(REG(0)),
+});
+
+constexpr static VMBytecode bytecode_ternary = VMBytecode(
+    {MOVIMM(REG(1), 42),
+     CMP(REG(2), REG(1), REG(0)),
+     JCC(REG(2), 0),
+     MOVIMM(REG(0), 0),
+     RET(REG(0)),
+     LABEL_PLACEHOLDER(0),
+     MOVIMM(REG(0), 1337),
+     RET(REG(0))}
+);
+
+constexpr static VMBytecode bytecode_fib = VMBytecode(
+    {MOVIMM(REG(255), 0), // Always 0
+     MOVIMM(REG(254), 1), // Always 1
+     CMP(REG(2), REG(0), REG(255)),
+     JCC(REG(2), 0),
+     MOVIMM(REG(1), 1),
+     MOVIMM(REG(3), 0),
+     MOVIMM(REG(4), 1),
+     LABEL_PLACEHOLDER(2),
+     CMP(REG(2), REG(0), REG(1)),
+     JCC(REG(2), 1),
+     ADD(REG(5), REG(4), REG(3)),
+     ADD(REG(3), REG(4), REG(255)),
+     ADD(REG(4), REG(5), REG(255)),
+     ADD(REG(1), REG(1), REG(254)),
+     JCC(REG(254), 2),
+     LABEL_PLACEHOLDER(1),
+     RET(REG(4)),
+     LABEL_PLACEHOLDER(0),
+     RET(REG(255))}
+);
+
 int main(int argc, char** argv)
 {
     // Usage: ./minivm 1 2 3 4
@@ -276,6 +321,6 @@ int main(int argc, char** argv)
     }
 
     printf("arguments: (%" PRIi64 ", %" PRIi64 ", %" PRIi64 ", %" PRIi64 ")\n", args[0], args[1], args[2], args[3]);
-    auto ret = execute_bytecode(bytecode, args[0], args[1], args[2], args[3]);
+    auto ret = execute_bytecode(bytecode_fib, args[0], args[1], args[2], args[3]);
     printf("result: %" PRIi64 "\n", ret);
 }
